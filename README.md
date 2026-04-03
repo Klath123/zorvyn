@@ -16,6 +16,9 @@ Zorvyn builds **secure, compliance-aware fintech backends** for startups and SME
 
 ---
 
+| **Frontend** | https://zorvyn-drab.vercel.app |
+| **Backend API** | https://zorvyn-9ben.onrender.com |
+
 ## Tech Stack
 
 | Layer | Technology |
