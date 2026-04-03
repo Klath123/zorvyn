@@ -1,0 +1,100 @@
+// This is your Prisma schema file
+// Zorvyn FinanceOps Dashboard - Data Model
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url       = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  name         String
+  status       UserStatus @default(ACTIVE)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  userRoles        UserRole[]
+  financialRecords FinancialRecord[]
+
+  @@map("users")
+}
+
+model Role {
+  id          String     @id @default(cuid())
+  name        RoleName   @unique
+  description String?
+  createdAt   DateTime   @default(now()) @map("created_at")
+
+  userRoles UserRole[]
+
+  @@map("roles")
+}
+
+model UserRole {
+  userId    String   @map("user_id")
+  roleId    String   @map("role_id")
+  assignedAt DateTime @default(now()) @map("assigned_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+model FinancialRecord {
+  id        String          @id @default(cuid())
+  userId    String          @map("user_id")
+  amount    Float
+  type      TransactionType
+  category  String
+  date      DateTime
+  notes     String?
+  status    TransactionStatus @default(SETTLED)
+  channel   PaymentChannel    @default(BANK_TRANSFER)
+  isDeleted Boolean           @default(false) @map("is_deleted")
+  deletedAt DateTime?         @map("deleted_at")
+  createdAt DateTime          @default(now()) @map("created_at")
+  updatedAt DateTime          @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("financial_records")
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum RoleName {
+  VIEWER
+  ANALYST
+  ADMIN
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  REFUND
+  FEE
+}
+
+enum TransactionStatus {
+  PENDING
+  SETTLED
+  REVERSED
+}
+
+enum PaymentChannel {
+  UPI
+  CARD
+  NETBANKING
+  BANK_TRANSFER
+}
